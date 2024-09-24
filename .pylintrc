@@ -1,0 +1,55 @@
+# nfd_financ/.pylintrc
+
+[MASTER]
+extension-pkg-whitelist=
+ignore=venv
+ignore-patterns=
+init-hook='import sys; sys.path.append("app")'
+
+[MESSAGES CONTROL]
+disable=
+    C0114,  # missing-module-docstring
+    C0115,  # missing-class-docstring
+    C0116,  # missing-function-docstring
+    W0621,  # redefined-outer-name
+    E0602,  # undefined-variable
+    E1101,   # no-member
+    E0401,  # public-method-method
+    R0914
+
+[FORMAT]
+max-line-length=88
+ignore-long-lines=
+
+[DESIGN]
+# Maximum number of arguments for function / method.
+max-args=10
+# Maximum number of attributes for a class (see R0902).
+max-attributes=15
+# Maximum number of boolean expressions in a if statement.
+max-bool-expr=5
+# Maximum number of branches for a function / method body.
+max-branches=12
+# Maximum number of return / yield for function / method body.
+max-returns=6
+# Maximum number of locals for function / method body.
+max-locals=15
+# Maximum number of parents for a class (see R0901).
+max-parents=7
+# Maximum number of public methods for a class (see R0904).
+max-public-methods=20
+# Maximum number of statements in function / method body.
+max-statements=50
+
+[IMPORTS]
+# Allow wildcard imports from modules that define `__all__`.
+allow-wildcard-with-all=no
+# Analyse import fallback blocks. This can be used to support both Python 2 and 3 compatible code.
+analyse-fallback-blocks=yes
+
+[EXCEPTIONS]
+# Exceptions that will emit a warning when being caught. Defaults to "BaseException, Exception".
+overgeneral-exceptions=
+    Exception,
+    BaseException
+

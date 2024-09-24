@@ -1,0 +1,57 @@
+# Diretórios de ambientes virtuais
+venv/
+env/
+.venv/
+
+# Diretórios do Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Diretórios de configuração do VSCode
+.vscode/
+*.code-workspace
+
+# Logs e arquivos temporários
+*.log
+*.tmp
+*.swp
+*.bak
+*.backup
+
+# Configurações específicas de sistema operacional
+.DS_Store
+Thumbs.db
+
+# Arquivos de cache
+.cache/
+.tox/
+.coverage
+coverage.xml
+*.cover
+.hypothesis/
+
+# Arquivos de configuração de IDEs e editores de texto
+.idea/
+*.sublime-workspace
+*.sublime-project
+.vscode/
+
+# Arquivos de instalação do sistema
+*.rpm
+*.deb
+*.tar.gz
+*.zip
+*.egg-info/
+
+# Arquivos de banco de dados
+*.db
+
+# Arquivos de configuração sensíveis
+config.yaml
+settings.py
+
+# Arquivos gerados pelo pdfkit e selenium
+*.pdf
+*.html

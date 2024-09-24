@@ -1,0 +1,15 @@
+// nfd_financ/pyrightconfig.json
+
+{
+    "typeCheckingMode": "basic",
+    "reportUnusedFunction": "information",
+    "reportUnusedVariable": "information",
+    "reportArgumentType": "none",
+    "reportIndexIssue": "none",
+    "reportOptionalMemberAccess": "none",
+    "reportAttributeAccessIssue": "none",
+    "reportGeneralTypeIssues": "none",
+    "reportOptionalIterable": "none",
+    "reportOptionalSubscript": "none"
+}
+
