@@ -1,14 +1,16 @@
+# tcc_good_code/user_service.py
+
 from datetime import datetime
 
-from database import get_db  # Importando o método de conexão com o banco de dados
-from email_service import send_email  # Importando o serviço de envio de e-mail
-from pdf_service import generate_pdf  # Importando o serviço de geração de PDF
-from utils import (  # Importando utilitários
+from app.domain.utils import (  # Importando utilitários
     calculate_price,
     format_prices,
     format_user_data,
     get_status,
 )
+from database import get_db  # Importando o método de conexão com o banco de dados
+from email_service import send_email  # Importando o serviço de envio de e-mail
+from pdf_service import generate_pdf  # Importando o serviço de geração de PDF
 
 
 def get_all_users():

@@ -1,4 +1,4 @@
-# email_service.py
+# tcc_good_code/email_service.py
 
 """
 Módulo responsável por enviar e-mails utilizando o servidor SMTP do Outlook.

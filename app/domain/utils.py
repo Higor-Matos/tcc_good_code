@@ -1,4 +1,4 @@
-# utils.py
+# tcc_good_code/app/domain/utils.py
 
 
 def calculate_price(services, age):
@@ -14,10 +14,9 @@ def calculate_price(services, age):
 def get_status(days_left):
     if days_left < 0:
         return "Expirado"
-    elif days_left < 5:
+    if days_left < 5:
         return "Expirando em breve"
-    else:
-        return "Ativo"
+    return "Ativo"
 
 
 def format_user_data(user, status):

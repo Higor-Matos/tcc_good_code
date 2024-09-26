@@ -1,0 +1,11 @@
+# tcc_good_code/app/presentation/docs/process_routes.yml
+
+post:
+  summary: "Processar todos os usuários"
+  description: "Endpoint para processar todos os usuários e gerar notas de débito."
+  responses:
+    200:
+      description: "Processamento concluído com sucesso"
+    500:
+      description: "Erro no processamento"
+

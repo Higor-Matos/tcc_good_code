@@ -1,4 +1,4 @@
-// nfd_financ/pyrightconfig.json
+// tcc_good_code/pyrightconfig.json
 
 {
     "typeCheckingMode": "basic",
@@ -12,4 +12,3 @@
     "reportOptionalIterable": "none",
     "reportOptionalSubscript": "none"
 }
-
