@@ -1,17 +1,21 @@
 # tcc_good_code/app/presentation/docs/user_routes.yml
 
-get:
-  summary: "Obter todos os usuários"
-  description: "Endpoint para recuperar todos os usuários cadastrados."
-  responses:
-    200:
-      description: "Lista de usuários recuperada com sucesso"
-      schema:
-        type: array
-        items:
-          $ref: "#/definitions/User"
-    500:
-      description: "Erro ao recuperar usuários"
+tags:
+  - User Routes
+summary: "Obter todos os usuários"
+description: "Endpoint para recuperar todos os usuários cadastrados."
+responses:
+  200:
+    description: "Lista de usuários recuperada com sucesso"
+    schema:
+      type: array
+      items:
+        $ref: "#/definitions/User"
+  500:
+    description: "Erro ao recuperar usuários"
+    schema:
+      $ref: "#/definitions/ApiResponse"
+
 definitions:
   User:
     type: object
@@ -35,4 +39,16 @@ definitions:
         format: date
       notes:
         type: string
+
+  ApiResponse:
+    type: object
+    properties:
+      message:
+        type: string
+      status:
+        type: integer
+      data:
+        type: object
+      errors:
+        type: object
 

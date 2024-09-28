@@ -6,3 +6,4 @@ Black
 Pylint
 AutoFlake
 flasgger
+gunicorn

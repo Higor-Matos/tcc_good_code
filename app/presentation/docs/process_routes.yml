@@ -1,11 +1,29 @@
 # tcc_good_code/app/presentation/docs/process_routes.yml
 
-post:
-  summary: "Processar todos os usuários"
-  description: "Endpoint para processar todos os usuários e gerar notas de débito."
-  responses:
-    200:
-      description: "Processamento concluído com sucesso"
-    500:
-      description: "Erro no processamento"
+tags:
+  - Process Routes
+summary: "Processar todos os usuários"
+description: "Endpoint para processar todos os usuários e gerar notas de débito."
+responses:
+  200:
+    description: "Processamento concluído com sucesso"
+    schema:
+      $ref: "#/definitions/ApiResponse"
+  500:
+    description: "Erro no processamento"
+    schema:
+      $ref: "#/definitions/ApiResponse"
+
+definitions:
+  ApiResponse:
+    type: object
+    properties:
+      message:
+        type: string
+      status:
+        type: integer
+      data:
+        type: object
+      errors:
+        type: object
 
