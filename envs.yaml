@@ -6,7 +6,7 @@ app:
   port: 5000
 
 database:
-  url: "sqlite:///./database.db"
+  url: "sqlite:///./data/database.db"
 
 logging:
   level: "DEBUG"
