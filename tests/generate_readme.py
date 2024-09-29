@@ -5,6 +5,21 @@ import json
 import subprocess
 
 
+def get_exclude_dirs():
+    """Retorna uma string de diretórios a serem excluídos para evitar duplicação."""
+    exclude_dirs = [
+        "../tests",
+        "../venv",
+        "../venv/*",
+        "../venv/lib",
+        "../venv/lib/python3.12",
+        "../venv/lib/python3.12/site-packages",
+        "../lib",
+        "../lib/*",
+    ]
+    return ",".join(exclude_dirs)
+
+
 def run_pytest():
     """Executa os testes e gera o relatório resumido."""
     result = subprocess.run(
@@ -30,15 +45,7 @@ def run_pytest():
 
 def extract_complexity():
     """Executa o Radon para calcular a complexidade e gera o relatório."""
-    exclude_dirs = [
-        "../tests",
-        "../venv",
-        "../venv/*",
-        "../venv/lib",
-        "../venv/lib/python3.12",
-        "../venv/lib/python3.12/site-packages",
-    ]
-    exclude_dirs_str = ",".join(exclude_dirs)
+    exclude_dirs_str = get_exclude_dirs()
     result = subprocess.run(
         ["radon", "cc", "../", "-a", "-s", "--exclude", exclude_dirs_str],
         stdout=subprocess.PIPE,
@@ -60,17 +67,7 @@ def extract_complexity():
 
 def run_security_scan():
     """Executa o Bandit para análise de segurança e retorna o resultado formatado."""
-    exclude_dirs = [
-        "../tests",
-        "../venv",
-        "../venv/*",
-        "../venv/lib",
-        "../venv/lib/python3.12",
-        "../venv/lib/python3.12/site-packages",
-        "../lib",
-        "../lib/*",
-    ]
-    exclude_dirs_str = ",".join(exclude_dirs)
+    exclude_dirs_str = get_exclude_dirs()
 
     result = subprocess.run(
         [
