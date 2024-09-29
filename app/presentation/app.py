@@ -60,9 +60,22 @@ injector = Injector([InjectorModule()])
 app.injector = injector
 logger.info("Injeção de dependências configurada.")
 
-register_user_routes(app)
-register_process_routes(app)
-logger.info("Rotas registradas.")
+
+try:
+    register_user_routes(app)
+    logger.info("Rotas de usuários registradas com sucesso.")
+except Exception as e:
+    logger.error("Erro ao registrar rotas de usuários: %s", e)
+
+try:
+    register_process_routes(app)
+    logger.info("Rotas de processamento registradas com sucesso.")
+except Exception as e:
+    logger.error("Erro ao registrar rotas de processamento: %s", e)
+
+
+for rule in app.url_map.iter_rules():
+    logger.info("Rota registrada: %s %s", rule.endpoint, rule.rule)
 
 
 @app.before_request
@@ -71,7 +84,7 @@ def before_request() -> None:
     session_factory = injector.get(sessionmaker)
     db_session = scoped_session(session_factory)
     setattr(g, "db_session", db_session)
-    g.injector = injector  # Adicionando o injector ao contexto global
+    g.injector = injector
     logger.info("Sessão de banco de dados iniciada para a requisição.")
 
 

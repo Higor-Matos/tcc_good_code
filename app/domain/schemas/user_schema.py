@@ -1,11 +1,12 @@
 # tcc_good_code/app/domain/schemas/user_schema.py
 
-from typing import Optional
+import datetime
+from typing import Optional, Union
 
 import pendulum
 from pydantic import BaseModel, EmailStr, field_validator
 
-from app.infrastructure import logger
+from app.infrastructure.logger import logger
 
 
 class UserSchema(BaseModel):
@@ -15,7 +16,7 @@ class UserSchema(BaseModel):
     address: Optional[str]
     phone: Optional[str]
     services: str
-    expiration_date: pendulum.Date
+    expiration_date: Union[pendulum.Date, str, None]
     notes: Optional[str]
 
     class Config:
@@ -35,9 +36,17 @@ class UserSchema(BaseModel):
     def validate_expiration_date(cls, value):
         """Valida e converte a data de expiração usando pendulum"""
         try:
-            expiration_date = (
-                pendulum.parse(value).date() if isinstance(value, str) else value
-            )
+            logger.debug("Validando expiration_date: %s (tipo: %s)", value, type(value))
+            if isinstance(value, pendulum.Date):
+                expiration_date = value
+            elif isinstance(value, str):
+                expiration_date = pendulum.parse(value).date()
+            elif isinstance(value, datetime.date):
+                expiration_date = pendulum.date(value.year, value.month, value.day)
+            else:
+                raise ValueError(
+                    "Tipo de dado inválido para expiration_date. Esperado pendulum.Date, datetime.date ou string."
+                )
             if expiration_date < pendulum.today().date():
                 logger.error(
                     "Data de expiração inválida: %s. Deve ser uma data futura.",
