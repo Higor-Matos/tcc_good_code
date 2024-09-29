@@ -11,8 +11,10 @@ from app.infrastructure.database import init_db
 from app.infrastructure.injector_module import InjectorModule
 from app.infrastructure.load_envs import load_envs
 from app.infrastructure.logger import setup_logger
-from app.presentation.routes.process_routes import process_bp
-from app.presentation.routes.user_routes import user_bp
+from app.presentation.routes.process_routes import (
+    register_routes as register_process_routes,
+)
+from app.presentation.routes.user_routes import register_routes as register_user_routes
 
 load_envs()
 logger = setup_logger()
@@ -21,7 +23,6 @@ app = Flask(__name__)
 
 
 def configure_swagger(app: Flask) -> None:
-    """Configura o Swagger para o aplicativo Flask com informações sobre o TCC."""
     swagger_config = {
         "headers": [],
         "specs": [
@@ -36,7 +37,6 @@ def configure_swagger(app: Flask) -> None:
         "swagger_ui": True,
         "specs_route": "/apidocs/",
     }
-
     swagger_template = {
         "info": {
             "title": "API TCC - Clean Code",
@@ -48,7 +48,6 @@ def configure_swagger(app: Flask) -> None:
             "version": "1.0.0",
         }
     }
-
     Swagger(app, config=swagger_config, template=swagger_template)
 
 
@@ -58,10 +57,11 @@ init_db()
 logger.info("Banco de dados inicializado.")
 
 injector = Injector([InjectorModule()])
+app.injector = injector
 logger.info("Injeção de dependências configurada.")
 
-app.register_blueprint(user_bp, url_prefix="/users")
-app.register_blueprint(process_bp, url_prefix="/process")
+register_user_routes(app)
+register_process_routes(app)
 logger.info("Rotas registradas.")
 
 
@@ -71,6 +71,7 @@ def before_request() -> None:
     session_factory = injector.get(sessionmaker)
     db_session = scoped_session(session_factory)
     setattr(g, "db_session", db_session)
+    g.injector = injector  # Adicionando o injector ao contexto global
     logger.info("Sessão de banco de dados iniciada para a requisição.")
 
 

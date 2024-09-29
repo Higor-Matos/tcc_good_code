@@ -1,8 +1,6 @@
 # tcc_good_code/app/presentation/routes/user_routes.py
 
-from flasgger import swag_from
-from flask import Blueprint
-from injector import inject
+from flask import Blueprint, g
 
 from app.domain.responses.api_response import internal_error_response, success_response
 from app.infrastructure.logger import logger
@@ -12,12 +10,14 @@ user_bp = Blueprint("user_bp", __name__)
 
 
 @user_bp.route("/", methods=["GET"])
-@inject
-@swag_from("../docs/user_routes.yml")
-def get_users(user_repository: UserRepository):
+def get_users():
     """
     Retorna todos os usuários cadastrados no banco de dados.
     """
+    user_repository = g.injector.get(
+        UserRepository
+    )  # Obtendo o UserRepository pelo Injector
+
     logger.info("Requisição recebida para listar todos os usuários.")
     try:
         users = user_repository.get_all_users()
@@ -26,3 +26,7 @@ def get_users(user_repository: UserRepository):
     except Exception as e:
         logger.error("Erro ao recuperar usuários: %s", e)
         return internal_error_response(message="Erro ao recuperar usuários")
+
+
+def register_routes(app):
+    app.register_blueprint(user_bp, url_prefix="/users")

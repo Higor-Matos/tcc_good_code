@@ -17,19 +17,23 @@ from app.services.user_service import UserService
 class InjectorModule(Module):
     def configure(self, binder: Binder):
         binder.bind(sessionmaker, to=SessionLocal, scope=singleton)
-
         binder.bind(Session, to=self.provide_db_session, scope=singleton)
-
         binder.bind(UserRepository, to=UserRepository, scope=singleton)
-        binder.bind(UserService, to=UserService, scope=singleton)
+
+        binder.bind(callable, to=self.provide_send_email, scope=singleton)
+        binder.bind(callable, to=self.provide_generate_pdf, scope=singleton)
+
+        binder.bind(UserService, to=self.provide_user_service, scope=singleton)
         binder.bind(logging.Logger, to=setup_logger(), scope=singleton)
-        binder.bind("send_email", to=send_email, scope=singleton)
-        binder.bind("generate_pdf", to=generate_pdf, scope=singleton)
 
     @provider
     @singleton
     def provide_user_service(
-        self, user_repo: UserRepository, db: Session
+        self,
+        user_repo: UserRepository,
+        db: Session,
+        send_email: callable,
+        generate_pdf: callable,
     ) -> UserService:
         return UserService(user_repo, db, send_email, generate_pdf)
 
@@ -52,3 +56,13 @@ class InjectorModule(Module):
     @singleton
     def provide_db_session(self, session_factory: sessionmaker) -> Session:
         return scoped_session(session_factory)()
+
+    @provider
+    @singleton
+    def provide_send_email(self) -> callable:
+        return send_email
+
+    @provider
+    @singleton
+    def provide_generate_pdf(self) -> callable:
+        return generate_pdf
