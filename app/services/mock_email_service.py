@@ -3,7 +3,7 @@
 from app.infrastructure.logger import logger
 
 
-def send_email(to_address, subject, body, attachment=None):
+def send_email(to_address, subject, attachment=None):
     """
     Mock de envio de e-mail. Apenas loga a tentativa de envio.
     """
