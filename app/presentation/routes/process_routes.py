@@ -1,7 +1,7 @@
 # tcc_good_code/app/presentation/routes/process_routes.py
 
 from flasgger import swag_from
-from flask import Blueprint, Flask, g
+from flask import Blueprint, g
 
 from app.domain.responses.api_response import internal_error_response, success_response
 from app.infrastructure.logger import logger
@@ -30,6 +30,6 @@ def process_route():
         )
 
 
-def register_routes(app: Flask):
+def register_routes(app):
     """Registra as rotas de processamento no app Flask."""
     app.register_blueprint(process_bp, url_prefix="/process")

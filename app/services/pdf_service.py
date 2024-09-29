@@ -12,6 +12,7 @@ def generate_pdf(template_path, context, pdf_filename):
     """
     Gera um arquivo PDF a partir de um template HTML e contexto fornecidos.
     """
+    html_file = None
     try:
         html_content = generate_html_content(template_path, context)
 

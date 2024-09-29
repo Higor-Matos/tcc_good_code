@@ -60,7 +60,8 @@ def attach_file(msg, attachment):
             part.set_payload(file.read())
             encoders.encode_base64(part)
             part.add_header(
-                "Content-Disposition", f'attachment; filename="{attachment}"'
+                "Content-Disposition",
+                f'attachment; filename="{os.path.basename(attachment)}"',
             )
             msg.attach(part)
         logger.debug("Arquivo anexado ao e-mail: %s", attachment)

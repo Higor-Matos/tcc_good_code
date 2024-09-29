@@ -1,10 +1,14 @@
 # tcc_good_code/app/services/user_service.py
 
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from datetime import date, datetime
+
 from injector import inject
 from sqlalchemy.orm import Session
 
 from app.domain import utils
 from app.domain.schemas.user_schema import UserSchema
+from app.infrastructure.database import SessionLocal
 from app.infrastructure.logger import logger
 from app.repository.user_repository import UserRepository
 
@@ -43,27 +47,83 @@ class UserService:
     def process_all_users(self):
         logger.info("Processando todos os usuários.")
         users = self.get_all_users()
-        for user in users:
-            self.process_user(user)
 
-    def process_user(self, user):
+        if not users:
+            logger.warning("Nenhum usuário para processar.")
+            return
+
+        with ThreadPoolExecutor(
+            max_workers=2
+        ) as executor:  # Reduced workers to prevent OOM
+            futures = {
+                executor.submit(self.process_user_safe, user): user for user in users
+            }
+            for future in as_completed(futures):
+                user = futures[future]
+                try:
+                    result = future.result()
+                    if result:
+                        logger.info("Usuário %s processado com sucesso.", user.email)
+                    else:
+                        logger.warning(
+                            "Processamento falhou para o usuário %s.", user.email
+                        )
+                except Exception as e:
+                    logger.error("Erro ao processar usuário %s: %s", user.email, e)
+
+    def process_user_safe(self, user):
+        """
+        Wrapper seguro para processar usuários, garantindo sessão independente por thread.
+        """
+        session = SessionLocal()  # Nova sessão para cada thread
+        try:
+            user_repo = UserRepository(session)
+            self.process_user(user_repo, user)
+            session.commit()  # Commit apenas se não houver erro
+            return True
+        except Exception as e:
+            logger.error("Erro ao processar usuário %s: %s", user.email, e)
+            session.rollback()  # Reverter qualquer alteração em caso de erro
+            return False
+        finally:
+            session.close()  # Fechar a sessão para evitar vazamentos
+
+    def process_user(self, user_repo, user):
         logger.info("Processando usuário: %s", user.email)
         try:
-            total_price, discount, tax, final_price = self.calculate_user_prices(user)
-            status = utils.get_status(user.expiration_date)
+            if not isinstance(user.expiration_date, date):
+                if isinstance(user.expiration_date, str):
+                    user.expiration_date = datetime.strptime(
+                        user.expiration_date, "%Y-%m-%d"
+                    ).date()
+                else:
+                    raise ValueError(
+                        "Data de expiração deve ser do tipo datetime.date ou string."
+                    )
 
-            self.update_user_status(user, status)
+            total_price, discount, tax, final_price = self.calculate_user_prices(user)
+            days_left = (user.expiration_date - date.today()).days
+            status = utils.get_status(days_left)
+
+            self.update_user_status(user_repo, user, status)
 
             if status in ["Expirado", "Expirando em breve"]:
                 self.send_user_notification(
                     user, status, total_price, discount, tax, final_price
                 )
+        except ValueError as e:
+            logger.error("Erro de valor ao processar usuário %s: %s", user.email, e)
         except Exception as e:
-            logger.error("Erro ao processar usuário %s: %s", user.email, e)
+            logger.error("Erro inesperado ao processar usuário %s: %s", user.email, e)
 
     def calculate_user_prices(self, user):
         """Calcula o preço total com desconto e imposto baseado nos serviços do usuário."""
-        user_services = user.services.split(",")
+        if isinstance(user.services, str):
+            user_services = user.services.split(",")
+        elif isinstance(user.services, list):
+            user_services = user.services
+        else:
+            user_services = []
         total_price, discount, tax, final_price = utils.calculate_price(
             user_services, user.age
         )
@@ -77,27 +137,43 @@ class UserService:
         )
         return total_price, discount, tax, final_price
 
-    def update_user_status(self, user, status):
+    def update_user_status(self, user_repo, user, status):
         """Atualiza o status do usuário no banco de dados."""
-        if self.user_repo.update_user_status(user.id, status):
-            logger.info("Status do usuário %s atualizado para: %s", user.email, status)
-        else:
-            logger.warning("Falha ao atualizar status para usuário %s", user.email)
+        try:
+            if user_repo.update_user_status(user.id, status):
+                logger.info(
+                    "Status do usuário %s atualizado para: %s", user.email, status
+                )
+            else:
+                logger.warning("Falha ao atualizar status para usuário %s", user.email)
+        except Exception as e:
+            logger.error("Erro ao atualizar status do usuário %s: %s", user.email, e)
 
     def send_user_notification(
         self, user, status, total_price, discount, tax, final_price
     ):
         """Envia notificação ao usuário com o PDF gerado, dependendo do status."""
-        user_data = utils.format_user_data(user, status)
-        utils.format_prices(total_price, discount, tax, final_price)
-        pdf_file = self.generate_pdf("template_path", user_data, "output_file.pdf")
+        try:
+            user_data = utils.format_user_data(user, status)
+            formatted_prices = utils.format_prices(
+                total_price, discount, tax, final_price
+            )
+            user_data.update(formatted_prices)
 
-        email_subject = f"Sua Nota de Débito - {status}"
-        email_body = (
-            "Segue em anexo sua nota de débito."
-            if status == "Expirado"
-            else "Lembrete de Expiração"
-        )
+            pdf_file = self.generate_pdf(
+                "template_path.html", user_data, f"{user.id}_nota_debito.pdf"
+            )
 
-        self.send_email(user.email, email_subject, email_body, pdf_file)
-        logger.info("Nota de débito enviada para: %s", user.email)
+            email_subject = f"Sua Nota de Débito - {status}"
+            email_body = (
+                "Segue em anexo sua nota de débito."
+                if status == "Expirado"
+                else "Lembrete de Expiração"
+            )
+
+            self.send_email(user.email, email_subject, email_body, pdf_file)
+            logger.info("Nota de débito enviada para: %s", user.email)
+        except Exception as e:
+            logger.error(
+                "Erro ao enviar notificação para usuário %s: %s", user.email, e
+            )
