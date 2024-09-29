@@ -21,9 +21,9 @@ class UserSchema(BaseModel):
 
     class Config:
         arbitrary_types_allowed = True
-        orm_mode = True
+        from_attributes = True
 
-    @field_validator("age")
+    @field_validator("age", mode="before")
     def validate_age(cls, value):
         """Valida a idade mínima"""
         if value <= 0:

@@ -3,13 +3,13 @@
 import logging
 
 from injector import Binder, Module, provider, singleton
-from sqlalchemy.orm import Session, scoped_session, sessionmaker
+from sqlalchemy.orm import sessionmaker
 
 from app.infrastructure.database import SessionLocal, init_db
 from app.infrastructure.load_envs import load_envs
 from app.infrastructure.logger import setup_logger
 from app.repository.user_repository import UserRepository
-from app.services.mock_email_service import send_email
+from app.services.email_service import send_email
 from app.services.pdf_service import generate_pdf
 from app.services.user_notification_service import UserNotificationService
 from app.services.user_processing_service import UserProcessingService
@@ -19,12 +19,9 @@ from app.services.user_service import UserService
 class InjectorModule(Module):
     def configure(self, binder: Binder):
         binder.bind(sessionmaker, to=SessionLocal, scope=singleton)
-        binder.bind(Session, to=self.provide_db_session, scope=singleton)
-        binder.bind(UserRepository, to=UserRepository, scope=singleton)
-
+        binder.bind(UserRepository, to=self.provide_user_repository, scope=singleton)
         binder.bind(callable, to=self.provide_send_email, scope=singleton)
         binder.bind(callable, to=self.provide_generate_pdf, scope=singleton)
-
         binder.bind(
             UserNotificationService,
             to=self.provide_user_notification_service,
@@ -40,13 +37,17 @@ class InjectorModule(Module):
 
     @provider
     @singleton
+    def provide_user_repository(self, session_factory: sessionmaker) -> UserRepository:
+        return UserRepository(session_factory)
+
+    @provider
+    @singleton
     def provide_user_service(
         self,
         user_repo: UserRepository,
-        db: Session,
         user_processing_service: UserProcessingService,
     ) -> UserService:
-        return UserService(user_repo, db, user_processing_service)
+        return UserService(user_repo, user_processing_service)
 
     @provider
     @singleton
@@ -76,11 +77,6 @@ class InjectorModule(Module):
     @singleton
     def provide_database_initializer(self) -> callable:
         return init_db
-
-    @provider
-    @singleton
-    def provide_db_session(self, session_factory: sessionmaker) -> Session:
-        return scoped_session(session_factory)()
 
     @provider
     @singleton

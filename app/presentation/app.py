@@ -56,6 +56,7 @@ configure_swagger(app)
 init_db()
 logger.info("Banco de dados inicializado.")
 
+
 injector = Injector([InjectorModule()])
 app.injector = injector
 logger.info("Injeção de dependências configurada.")

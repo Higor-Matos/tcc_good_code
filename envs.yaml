@@ -9,7 +9,7 @@ database:
   url: "sqlite:///./data/database.db"
 
 logging:
-  level: "DEBUG"
+  level: "WARNING"
   log_file: "logs/app.log"
 
 smtp:

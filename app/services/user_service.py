@@ -8,9 +8,8 @@ from app.services.user_processing_service import UserProcessingService
 
 
 class UserService:
-    def __init__(self, user_repo, db, user_processing_service: UserProcessingService):
+    def __init__(self, user_repo, user_processing_service: UserProcessingService):
         self.user_repo = user_repo
-        self.db = db
         self.user_processing_service = user_processing_service
 
     def get_all_users(self):
@@ -24,18 +23,6 @@ class UserService:
             logger.error("Erro ao recuperar usuários: %s", e)
             return []
 
-    def add_user(self, user_data):
-        """Adiciona um novo usuário ao sistema."""
-        logger.info("Adicionando novo usuário: %s", user_data.email)
-        try:
-            new_user = self.user_repo.add_user(user_data)
-            if new_user:
-                logger.info("Usuário adicionado com sucesso: %s", new_user.email)
-            return new_user
-        except Exception as e:
-            logger.error("Erro ao adicionar usuário: %s", e)
-            return None
-
     def process_all_users(self):
         """
         Processa todos os usuários, gerando as notas em PDF e enviando-as por e-mail.
@@ -47,49 +34,86 @@ class UserService:
             logger.warning("Nenhum usuário para processar.")
             return
 
+        user_data_list = []
+        for user in users:
+            user_data = {
+                "id": user.id,
+                "email": user.email,
+                "name": user.name,
+                "expiration_date": user.expiration_date,
+                "services": user.services,
+                "age": user.age,
+                "address": user.address,
+                "phone": user.phone,
+            }
+            user_data_list.append(user_data)
+
         with ThreadPoolExecutor(max_workers=2) as executor:
             futures = {
                 executor.submit(
-                    self.user_processing_service.process_user_and_generate_pdf, user
-                ): user
-                for user in users
+                    self.user_processing_service.process_user_and_generate_pdf,
+                    user_data,
+                ): user_data
+                for user_data in user_data_list
             }
             for future in as_completed(futures):
-                user = futures[future]
+                user_data = futures[future]
                 try:
                     result, pdf_filename = future.result()
                     if result:
                         logger.info(
                             "Usuário %s processado com sucesso. PDF gerado: %s",
-                            user.email,
+                            user_data["email"],
                             pdf_filename,
                         )
                     else:
                         logger.warning(
-                            "Processamento falhou para o usuário %s.", user.email
+                            "Processamento falhou para o usuário %s.",
+                            user_data["email"],
                         )
                 except Exception as e:
-                    logger.error("Erro ao processar usuário %s: %s", user.email, e)
+                    logger.error(
+                        "Erro ao processar usuário %s: %s", user_data["email"], e
+                    )
 
-        self.send_all_emails(users)
+        self.send_all_emails(user_data_list)
 
-    def send_all_emails(self, users):
+    def send_all_emails(self, user_data_list):
         """
         Envia e-mails para todos os usuários com os PDFs gerados anexados.
         """
         logger.info("Iniciando o envio de e-mails com os PDFs gerados.")
-        for user in users:
-            pdf_filename = f"{user.id}_nota_debito.pdf"
+        for user_data in user_data_list:
+            pdf_filename = os.path.join(
+                self.user_processing_service.pdf_directory,
+                f"{user_data['id']}_nota_debito.pdf",
+            )
             if os.path.exists(pdf_filename):
                 try:
                     self.user_processing_service.send_email_with_attachment(
-                        user, pdf_filename
+                        user_data, pdf_filename
                     )
-                    logger.info("Email enviado com sucesso para: %s", user.email)
+                    logger.info(
+                        "Email enviado com sucesso para: %s", user_data["email"]
+                    )
                 except Exception as e:
-                    logger.error("Erro ao enviar email para %s: %s", user.email, e)
+                    logger.error(
+                        "Erro ao enviar email para %s: %s", user_data["email"], e
+                    )
             else:
                 logger.warning(
                     "PDF não encontrado para o usuário %s. Email não enviado.",
-                    user.email,
+                    user_data["email"],
                 )
+
+    def add_user(self, user_data):
+        """Adiciona um novo usuário ao sistema."""
+        logger.info("Adicionando novo usuário: %s", user_data.email)
+        try:
+            new_user = self.user_repo.add_user(user_data)
+            if new_user:
+                logger.info("Usuário adicionado com sucesso: %s", new_user.email)
+            return new_user
+        except Exception as e:
+            logger.error("Erro ao adicionar usuário: %s", e)
+            return None

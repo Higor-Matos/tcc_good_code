@@ -7,10 +7,10 @@ import os
 
 def setup_logger():
     try:
-        log_level = os.getenv("LOGGING_LEVEL", "DEBUG")
+        log_level = os.getenv("LOGGING_LEVEL", "WARNING")
         log_file = os.getenv("LOGGING_LOG_FILE", "logs/app.log")
 
-        log_level = getattr(logging, log_level.upper(), logging.DEBUG)
+        log_level = getattr(logging, log_level.upper(), logging.WARNING)
 
         log_dir = os.path.dirname(log_file)
         if not os.path.exists(log_dir):

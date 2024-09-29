@@ -15,11 +15,10 @@ def generate_pdf(template_path, context, pdf_filename):
     html_file = None
     try:
         html_content = generate_html_content(template_path, context)
-
-        html_file = create_html_file(html_content, pdf_filename)
-
+        html_file = create_html_file(
+            html_content, pdf_filename.replace(".pdf", ".html")
+        )
         render_html_to_pdf(html_file, pdf_filename)
-
         logger.info("PDF gerado com sucesso: %s", pdf_filename)
         return pdf_filename
     except Exception as e:
@@ -42,16 +41,15 @@ def generate_html_content(template_path, context):
         raise
 
 
-def create_html_file(html_content, pdf_filename):
+def create_html_file(html_content, html_filename):
     """
     Cria um arquivo HTML temporário para geração do PDF.
     """
     try:
-        html_file = pdf_filename.replace(".pdf", ".html")
-        with open(html_file, "w", encoding="utf-8") as file:
+        with open(html_filename, "w", encoding="utf-8") as file:
             file.write(html_content)
-        logger.info("Arquivo HTML criado com sucesso: %s", html_file)
-        return html_file
+        logger.info("Arquivo HTML criado com sucesso: %s", html_filename)
+        return html_filename
     except Exception as e:
         logger.error("Erro ao criar arquivo HTML temporário: %s", e)
         raise
