@@ -14,9 +14,7 @@ def get_users():
     """
     Retorna todos os usuários cadastrados no banco de dados.
     """
-    user_repository = g.injector.get(
-        UserRepository
-    )  # Obtendo o UserRepository pelo Injector
+    user_repository = g.injector.get(UserRepository)
 
     logger.info("Requisição recebida para listar todos os usuários.")
     try:

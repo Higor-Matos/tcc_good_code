@@ -52,9 +52,7 @@ class UserService:
             logger.warning("Nenhum usuário para processar.")
             return
 
-        with ThreadPoolExecutor(
-            max_workers=2
-        ) as executor:  # Reduced workers to prevent OOM
+        with ThreadPoolExecutor(max_workers=2) as executor:
             futures = {
                 executor.submit(self.process_user_safe, user): user for user in users
             }
@@ -75,18 +73,18 @@ class UserService:
         """
         Wrapper seguro para processar usuários, garantindo sessão independente por thread.
         """
-        session = SessionLocal()  # Nova sessão para cada thread
+        session = SessionLocal()
         try:
             user_repo = UserRepository(session)
             self.process_user(user_repo, user)
-            session.commit()  # Commit apenas se não houver erro
+            session.commit()
             return True
         except Exception as e:
             logger.error("Erro ao processar usuário %s: %s", user.email, e)
-            session.rollback()  # Reverter qualquer alteração em caso de erro
+            session.rollback()
             return False
         finally:
-            session.close()  # Fechar a sessão para evitar vazamentos
+            session.close()
 
     def process_user(self, user_repo, user):
         logger.info("Processando usuário: %s", user.email)
