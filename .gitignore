@@ -52,3 +52,9 @@ settings.py
 
 *log*
 
+*benchmark_report.json
+
+*complexity_report.txt
+
+*security_report.json
+

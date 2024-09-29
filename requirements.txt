@@ -7,3 +7,9 @@ Pylint
 AutoFlake
 flasgger
 gunicorn
+pytest-benchmark
+pytest
+pytest-cov
+bandit
+pytest-html
+randon
