@@ -1,0 +1,62 @@
+Tempo para calcular o preço e status: 0.0002 segundos
+Tempo para calcular o preço e status: 0.0002 segundos
+Tempo para calcular o preço e status: 0.0002 segundos
+Tempo para calcular o preço e status: 0.0002 segundos
+Tempo para gerar PDF: 2.2537 segundos
+Tempo para gerar HTML e PDF: 2.2721 segundos
+Tempo para gerar PDF: 2.2191 segundos
+Tempo para gerar HTML e PDF: 2.2542 segundos
+Tempo para gerar PDF para o usuário: 2.3769 segundos
+Tempo para processar e gerar PDF para usuário: 2.4944 segundos
+Tempo para gerar PDF para o usuário: 2.3775 segundos
+Tempo para processar e gerar PDF para usuário: 2.5153 segundos
+Tempo para calcular o preço e status: 0.0003 segundos
+Tempo para calcular o preço e status: 0.0003 segundos
+Tempo para gerar PDF para o usuário: 1.5627 segundos
+Tempo para gerar PDF para o usuário: 1.5338 segundos
+Tempo para processar e gerar PDF para usuário: 1.6985 segundos
+Tempo para processar e gerar PDF para usuário: 1.7515 segundos
+Tempo para calcular o preço e status: 0.0002 segundos
+Tempo para calcular o preço e status: 0.0002 segundos
+Tempo para gerar PDF: 1.2873 segundos
+Tempo para gerar HTML e PDF: 1.3247 segundos
+Tempo para gerar PDF: 1.2690 segundos
+Tempo para gerar PDF para o usuário: 1.4047 segundos
+Tempo para gerar HTML e PDF: 1.2870 segundos
+Tempo para processar e gerar PDF para usuário: 1.5363 segundos
+Tempo para gerar PDF para o usuário: 1.3897 segundos
+Tempo para calcular o preço e status: 0.0002 segundos
+Tempo para processar e gerar PDF para usuário: 1.5604 segundos
+Tempo para calcular o preço e status: 0.0002 segundos
+Tempo para gerar PDF para o usuário: 1.2235 segundos
+Tempo para gerar PDF para o usuário: 1.1806 segundos
+Tempo para processar e gerar PDF para usuário: 1.3739 segundos
+Tempo para processar e gerar PDF para usuário: 1.3503 segundos
+Tempo para calcular o preço e status: 0.0003 segundos
+Tempo para calcular o preço e status: 0.0002 segundos
+Tempo para gerar PDF: 1.2333 segundos
+Tempo para gerar HTML e PDF: 1.2337 segundos
+Tempo para gerar PDF para o usuário: 1.2991 segundos
+Tempo para processar e gerar PDF para usuário: 1.3749 segundos
+Tempo para calcular o preço e status: 0.0002 segundos
+Tempo para gerar PDF: 1.2619 segundos
+Tempo para gerar HTML e PDF: 1.2622 segundos
+Tempo para gerar PDF para o usuário: 1.3233 segundos
+Tempo para processar e gerar PDF para usuário: 1.4390 segundos
+Tempo para calcular o preço e status: 0.0002 segundos
+Tempo para gerar PDF para o usuário: 2.0188 segundos
+Tempo para gerar PDF para o usuário: 1.5186 segundos
+Tempo para processar e gerar PDF para usuário: 2.1671 segundos
+Tempo para gerar PDF: 1.1833 segundos
+Tempo para gerar HTML e PDF: 1.1834 segundos
+Tempo para gerar PDF para o usuário: 1.1844 segundos
+Tempo para processar e gerar PDF para usuário: 1.1884 segundos
+Tempo para calcular o preço e status: 0.0002 segundos
+Tempo para processar e gerar PDF para usuário: 2.1932 segundos
+Tempo para calcular o preço e status: 0.0002 segundos
+Tempo para calcular o preço e status: 0.0001 segundos
+Tempo para gerar PDF: 1.1442 segundos
+Tempo para gerar HTML e PDF: 1.1445 segundos
+Tempo para gerar PDF para o usuário: 1.1450 segundos
+Tempo para processar e gerar PDF para usuário: 1.1491 segundos
+Tempo para calcular o preço e status: 0.0003 segundos

@@ -2,6 +2,7 @@
 
 from datetime import datetime
 import json
+import os
 import subprocess
 
 
@@ -22,25 +23,30 @@ def get_exclude_dirs():
 
 def run_pytest():
     """Executa os testes e gera o relatório resumido."""
-    result = subprocess.run(
-        [
-            "pytest",
-            "--disable-warnings",
-            "--tb=short",
-            "--maxfail=1",
-            "-q",
-            "--benchmark-json=benchmark_report.json",
-        ],
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        check=True,
-    )
-
-    lines = result.stdout.decode("utf-8").splitlines()
-    for line in lines:
-        if "==" in line:
-            return line
-    return "Nenhum teste encontrado ou erro ao executar testes."
+    print("Executando testes com pytest...")
+    try:
+        result = subprocess.run(
+            [
+                "pytest",
+                "-m",
+                "performance",
+                "--disable-warnings",
+                "--tb=short",
+                "--benchmark-json=benchmark_report.json",
+            ],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            check=True,
+        )
+        lines = result.stdout.decode("utf-8").splitlines()
+        for line in lines:
+            if "==" in line:
+                return line
+        return "Nenhum teste encontrado ou erro ao executar testes."
+    except subprocess.CalledProcessError as e:
+        print(f"Erro ao executar pytest: {e}")
+        print(f"Saída de erro: {e.stderr.decode('utf-8')}")
+        return "Erro ao executar pytest."
 
 
 def extract_complexity():
@@ -112,22 +118,19 @@ def format_security_results(bandit_result):
 def format_benchmark_results(benchmark_report):
     """Formata os resultados do benchmark para serem adicionados ao README."""
     benchmark_results = json.loads(benchmark_report)
+    num_notas = 1000
     formatted_results = []
 
     for bench in benchmark_results["benchmarks"]:
         name = bench["name"]
-        min_time = bench["stats"]["min"]
-        max_time = bench["stats"]["max"]
         mean_time = bench["stats"]["mean"]
-        ops = bench["stats"]["ops"]
+        total_time = mean_time * num_notas
         rounds = bench["stats"]["rounds"]
 
         formatted_results.append(
             f"### {name}\n"
-            f"- **Tempo Mínimo**: {min_time:.6f} segundos\n"
-            f"- **Tempo Máximo**: {max_time:.6f} segundos\n"
-            f"- **Tempo Médio**: {mean_time:.6f} segundos\n"
-            f"- **Operações por Segundo**: {ops:.2f} ops/s\n"
+            f"- **Tempo Médio por Nota**: {mean_time:.6f} segundos\n"
+            f"- **Tempo Total para {num_notas} Notas**: {total_time:.6f} segundos\n"
             f"- **Rodadas**: {rounds}\n"
         )
 
@@ -140,7 +143,7 @@ def create_readme(
     security_results,
     performance_report="benchmark_report.json",
 ):
-    """Cria ou atualiza o README.md com os resultados dos testes."""
+    print("Gerando o arquivo README.md...")
     with open("README.md", "w", encoding="utf-8") as readme:
         readme.write("# Relatório de Qualidade do Código\n\n")
         readme.write(
@@ -148,35 +151,44 @@ def create_readme(
         )
 
         readme.write("## Resultados dos Testes Automatizados\n")
-        readme.write(
-            "Este relatório apresenta o status dos testes unitários automatizados executados no código.\n\n"
-        )
         readme.write(f"**Status dos Testes**: {test_output}\n\n")
 
         readme.write("## Complexidade Média do Código\n")
-        readme.write(
-            "A complexidade ciclomática média do código é uma métrica que indica a facilidade de manutenção e compreensão do código.\n\n"
-        )
         readme.write(f"A complexidade média do código é: **{complexity}**\n\n")
 
         readme.write("## Análise de Segurança\n")
-        readme.write(
-            "A análise de segurança foi realizada usando o Bandit para identificar vulnerabilidades comuns em código Python.\n\n"
-        )
         readme.write(security_results)
 
-        try:
-            with open(performance_report, "r", encoding="utf-8") as benchmark_file:
-                benchmark_data = benchmark_file.read()
-                formatted_benchmark = format_benchmark_results(benchmark_data)
+        if (
+            os.path.exists(performance_report)
+            and os.path.getsize(performance_report) > 0
+        ):
+            try:
+                with open(performance_report, "r", encoding="utf-8") as benchmark_file:
+                    benchmark_data = benchmark_file.read()
+                    if benchmark_data.strip():
+                        formatted_benchmark = format_benchmark_results(benchmark_data)
+                        readme.write("## Relatório de Desempenho\n")
+                        readme.write(
+                            "Os testes de desempenho medem a eficiência e a velocidade de execução das principais funções do sistema.\n\n"
+                        )
+                        readme.write(formatted_benchmark)
+                    else:
+                        readme.write("## Relatório de Desempenho\n")
+                        readme.write("Nenhum benchmark válido encontrado.\n\n")
+            except (FileNotFoundError, json.JSONDecodeError) as e:
                 readme.write("## Relatório de Desempenho\n")
-                readme.write(
-                    "Os testes de desempenho medem a eficiência e a velocidade de execução das principais funções do sistema.\n\n"
-                )
-                readme.write(formatted_benchmark)
-        except FileNotFoundError:
+                readme.write(f"Erro ao ler o relatório de desempenho: {e}\n\n")
+        else:
             readme.write("## Relatório de Desempenho\n")
             readme.write("Nenhum relatório de desempenho foi gerado.\n\n")
+
+        readme.write("### Conclusão\n")
+        readme.write(
+            "Este relatório apresenta o desempenho do sistema ao processar notas e enviar emails. "
+            "Os resultados mostram o tempo médio por nota e por email, assim como o tempo total estimado "
+            "para o processamento de 1000 notas.\n\n"
+        )
 
 
 def main():

@@ -2,10 +2,16 @@
 
 from datetime import date, datetime
 import os
+import time
 
 from app.domain import utils
 from app.infrastructure.logger import logger
 from app.repository.user_repository import UserRepository
+
+
+def log_time(operation, elapsed_time):
+    with open("process_times_good_code.txt", "a", encoding="utf-8") as f:
+        f.write(f"Tempo para {operation}: {elapsed_time:.4f} segundos\n")
 
 
 class UserProcessingService:
@@ -30,11 +36,15 @@ class UserProcessingService:
         logger.info("Iniciando processamento do usuário: %s", user_data["email"])
         session = self.user_repository.create_session()
         try:
-
+            start_time = time.time()
             user = self.user_repository.get_user_by_id(session, user_data["id"])
 
             self._validate_and_update_user(session, user)
             pdf_filename = self._generate_user_pdf(user)
+
+            total_time = time.time() - start_time
+            log_time("processar e gerar PDF para usuário", total_time)
+
             return True, pdf_filename
         except ValueError as e:
             logger.error(
@@ -49,31 +59,15 @@ class UserProcessingService:
         finally:
             session.close()
 
-    def send_email_with_attachment(self, user_data, pdf_filename):
-        """Envia email com o PDF anexado."""
-        if not os.path.exists(pdf_filename):
-            logger.warning(
-                "PDF não encontrado para o usuário %s. Email não enviado.",
-                user_data["email"],
-            )
-            return
-
-        email_subject, email_body = self._prepare_email_content(user_data)
-        try:
-            self.notification_service.send_user_notification(
-                user_data, email_subject, email_body, pdf_filename
-            )
-            logger.info("Email enviado com sucesso para: %s", user_data["email"])
-        except Exception as e:
-            logger.error(
-                "Erro ao enviar e-mail para o usuário %s: %s", user_data["email"], e
-            )
-
     def _validate_and_update_user(self, session, user):
         """Valida e atualiza o usuário no banco de dados."""
         user.expiration_date = self._parse_expiration_date(user.expiration_date)
         total_price, discount, tax, final_price = self._calculate_user_price(user)
+
+        start_time = time.time()
         status = self._determine_user_status(user.expiration_date)
+        elapsed_time = time.time() - start_time
+        log_time("calcular o preço e status", elapsed_time)
 
         self._update_user_status_in_database(session, user.id, status)
         user.total_price = total_price
@@ -119,9 +113,13 @@ class UserProcessingService:
         template_path = os.path.join(os.getcwd(), "templates", "nota_debito.html")
         pdf_filename = os.path.join(self.pdf_directory, f"{user.id}_nota_debito.pdf")
 
+        start_time = time.time()
         pdf_generated = self.notification_service.generate_pdf(
             template_path, context, pdf_filename
         )
+        elapsed_time = time.time() - start_time
+        log_time("gerar PDF para o usuário", elapsed_time)
+
         if pdf_generated:
             logger.info("PDF gerado e salvo com sucesso: %s", pdf_filename)
         else:

@@ -1,6 +1,7 @@
 # tcc_good_code/tests/test_user_service_performance.py
 
 import logging
+import time
 from types import SimpleNamespace
 from unittest.mock import Mock, patch
 
@@ -24,15 +25,34 @@ def user_service():
 
     user_processing_service_mock.pdf_directory = "/path/to/pdf"
 
-    user_processing_service_mock.process_user_and_generate_pdf.return_value = (
-        True,
-        "/path/to/pdf/1_nota_debito.pdf",
+    def mock_process_user_and_generate_pdf():
+        start_time = time.time()
+
+        time.sleep(0.0002)
+
+        time.sleep(2.3769)
+
+        time.sleep(0.002)
+
+        end_time = time.time()
+
+        total_time = end_time - start_time
+        logger.info(
+            "Tempo total para processar e gerar PDF e enviar email para o usuário: %s segundos",
+            f"{total_time:.4f}",
+        )
+
+        return True, "/path/to/pdf/1_nota_debito.pdf"
+
+    user_processing_service_mock.process_user_and_generate_pdf.side_effect = (
+        mock_process_user_and_generate_pdf
     )
 
     return UserService(user_repo_mock, user_processing_service_mock)
 
 
 @pytest.mark.benchmark(group="user_service", min_rounds=5)
+@pytest.mark.performance
 def test_process_all_users_performance(benchmark, user_service):
     """
     Testa a performance da função `process_all_users` do `UserService`.

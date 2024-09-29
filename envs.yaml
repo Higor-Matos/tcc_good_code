@@ -3,7 +3,7 @@
 app:
   name: "tcc_good_code"
   version: "1.0.0"
-  port: 5000
+  port: 5001
 
 database:
   url: "sqlite:///./data/database.db"

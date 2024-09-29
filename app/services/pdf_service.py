@@ -1,11 +1,17 @@
 # tcc_good_code/app/services/pdf_service.py
 
 import os
+import time
 
 import pdfkit
 
 from app.domain.utils import load_template
 from app.infrastructure.logger import logger
+
+
+def log_time(operation, elapsed_time):
+    with open("process_times_good_code.txt", "a", encoding="utf-8") as f:
+        f.write(f"Tempo para {operation}: {elapsed_time:.4f} segundos\n")
 
 
 def generate_pdf(template_path, context, pdf_filename):
@@ -18,7 +24,12 @@ def generate_pdf(template_path, context, pdf_filename):
         html_file = create_html_file(
             html_content, pdf_filename.replace(".pdf", ".html")
         )
+
+        start_time = time.time()
         render_html_to_pdf(html_file, pdf_filename)
+        elapsed_time = time.time() - start_time
+        log_time("gerar HTML e PDF", elapsed_time)
+
         logger.info("PDF gerado com sucesso: %s", pdf_filename)
         return pdf_filename
     except Exception as e:
@@ -61,7 +72,12 @@ def render_html_to_pdf(html_file, pdf_filename):
     """
     try:
         options = {"quiet": "", "enable-local-file-access": "", "encoding": "UTF-8"}
+
+        start_time = time.time()
         pdfkit.from_file(html_file, pdf_filename, options=options)
+        elapsed_time = time.time() - start_time
+        log_time("gerar PDF", elapsed_time)
+
         logger.info("PDF gerado a partir do arquivo HTML: %s", pdf_filename)
     except Exception as e:
         logger.error("Erro ao renderizar o PDF: %s", e)

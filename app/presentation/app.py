@@ -108,6 +108,6 @@ def index():
 
 if __name__ == "__main__":
     app_name = os.getenv("APP_NAME", "TCC API - Clean Code")
-    app_port = int(os.getenv("APP_PORT", "5000"))
+    app_port = int(os.getenv("APP_PORT", "5001"))
     logger.info("Iniciando servidor %s na porta %d.", app_name, app_port)
     app.run(port=app_port, use_reloader=False)

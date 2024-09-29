@@ -1,8 +1,20 @@
 # tcc_good_code/tests/test_security.py
 
 import json
+import subprocess
 
-from generate_readme import run_security_scan
+
+def run_security_scan():
+    """Executa o Bandit para análise de segurança e retorna o resultado formatado."""
+    exclude_dirs_str = "../venv, ../tests, ../lib"
+    result = subprocess.run(
+        ["bandit", "-r", "../", "--exclude", exclude_dirs_str, "-f", "json"],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        check=True,
+    )
+    output = result.stdout.decode("utf-8")
+    return json.loads(output)
 
 
 def test_security():
