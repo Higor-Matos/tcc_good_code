@@ -34,7 +34,7 @@ def configure_swagger(app: Flask) -> None:
         ],
         "static_url_path": "/flasgger_static",
         "swagger_ui": True,
-        "specs_route": "/apidocs/",  # Alterado para servir a documentação em /apidocs
+        "specs_route": "/apidocs/",
     }
 
     swagger_template = {
@@ -75,7 +75,7 @@ def before_request() -> None:
 
 
 @app.teardown_request
-def teardown_request(exception=None) -> None:
+def teardown_request(_exception=None) -> None:
     """Fecha a sessão de banco de dados após cada requisição."""
     session = getattr(g, "db_session", None)
     if session:

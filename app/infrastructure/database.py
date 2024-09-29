@@ -2,14 +2,14 @@
 
 import os
 
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, inspect
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import sessionmaker
 
 import app.domain.entities.user as user_models
 from app.infrastructure.logger import logger
 
-DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./database.db")
+DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./data/database.db")
 
 try:
     engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
@@ -22,8 +22,14 @@ except SQLAlchemyError as e:
 
 def init_db():
     try:
-        user_models.Base.metadata.create_all(bind=engine)
-        logger.info("Banco de dados inicializado e tabelas criadas com sucesso.")
+        inspector = inspect(engine)
+        if "users" not in inspector.get_table_names():
+            user_models.Base.metadata.create_all(bind=engine)
+            logger.info("Banco de dados inicializado e tabelas criadas com sucesso.")
+        else:
+            logger.info(
+                "Tabela 'users' já existe. Nenhuma alteração foi feita no banco de dados."
+            )
     except SQLAlchemyError as e:
         logger.error("Erro ao inicializar o banco de dados: %s", e)
         raise
