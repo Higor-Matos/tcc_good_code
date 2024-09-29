@@ -2,6 +2,8 @@
 
 import logging
 
+from app.domain.schemas.user_schema import UserSchema
+
 logger = logging.getLogger(__name__)
 
 
@@ -91,3 +93,16 @@ def load_template(template_path, context):
     except Exception as e:
         logger.error("Erro ao carregar template: %s", e)
         raise
+
+
+def validate_user(user):
+    """
+    Função auxiliar para validar um único usuário.
+    Retorna um dicionário válido ou None em caso de erro.
+    """
+    try:
+        user_schema = UserSchema.model_validate(user, from_attributes=True)
+        return user_schema.model_dump()
+    except Exception as e:
+        logger.error("Erro ao validar usuário %s: %s", user.id, e)
+        return None

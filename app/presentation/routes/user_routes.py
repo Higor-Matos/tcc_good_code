@@ -1,10 +1,12 @@
 # tcc_good_code/app/presentation/routes/user_routes.py
 
+from concurrent.futures import ThreadPoolExecutor, as_completed
+
 from flasgger import swag_from
 from flask import Blueprint, g
 
 from app.domain.responses.api_response import internal_error_response, success_response
-from app.domain.schemas.user_schema import UserSchema
+from app.domain.utils import validate_user
 from app.infrastructure.logger import logger
 from app.repository.user_repository import UserRepository
 
@@ -23,14 +25,12 @@ def get_users():
         users = user_repository.get_all_users()
         valid_users = []
 
-        for user in users:
-            try:
-
-                user_schema = UserSchema.model_validate(user, from_attributes=True)
-                valid_users.append(user_schema.model_dump())
-            except Exception as e:
-
-                logger.error("Erro ao validar usuário %s: %s", user.id, e)
+        with ThreadPoolExecutor(max_workers=4) as executor:
+            futures = {executor.submit(validate_user, user): user for user in users}
+            for future in as_completed(futures):
+                result = future.result()
+                if result:
+                    valid_users.append(result)
 
         logger.info(
             "Usuários válidos recuperados com sucesso. Total: %d", len(valid_users)
