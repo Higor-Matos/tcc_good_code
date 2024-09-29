@@ -13,3 +13,4 @@ pytest-cov
 bandit
 pytest-html
 randon
+Flask-WTF

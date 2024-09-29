@@ -17,7 +17,6 @@ def process_users(app):
     Função que realiza o processamento dos usuários em segundo plano.
     """
     with app.app_context():
-
         injector = current_app.injector
         user_service = injector.get(UserService)
         try:
