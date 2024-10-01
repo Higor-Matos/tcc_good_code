@@ -5,6 +5,8 @@ import json
 import os
 import subprocess
 
+REPORT_TITLE = "## Relatório de Desempenho\n"
+
 
 def get_exclude_dirs():
     """Retorna uma string de diretórios a serem excluídos para evitar duplicação."""
@@ -168,19 +170,19 @@ def create_readme(
                     benchmark_data = benchmark_file.read()
                     if benchmark_data.strip():
                         formatted_benchmark = format_benchmark_results(benchmark_data)
-                        readme.write("## Relatório de Desempenho\n")
+                        readme.write(REPORT_TITLE)
                         readme.write(
                             "Os testes de desempenho medem a eficiência e a velocidade de execução das principais funções do sistema.\n\n"
                         )
                         readme.write(formatted_benchmark)
                     else:
-                        readme.write("## Relatório de Desempenho\n")
+                        readme.write(REPORT_TITLE)
                         readme.write("Nenhum benchmark válido encontrado.\n\n")
             except (FileNotFoundError, json.JSONDecodeError) as e:
-                readme.write("## Relatório de Desempenho\n")
+                readme.write(REPORT_TITLE)
                 readme.write(f"Erro ao ler o relatório de desempenho: {e}\n\n")
         else:
-            readme.write("## Relatório de Desempenho\n")
+            readme.write(REPORT_TITLE)
             readme.write("Nenhum relatório de desempenho foi gerado.\n\n")
 
         readme.write("### Conclusão\n")
